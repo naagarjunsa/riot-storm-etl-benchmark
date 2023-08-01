@@ -8,7 +8,7 @@ import org.apache.storm.topology.TopologyBuilder;
 public class HealthDataTopology {
 
     public static void run() {
-        String inputFile = "data.log";
+        String inputFile = "/home/centos/riot_storm/data.log";
 
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("healthDataReader", new HealthDataSpout(inputFile));
@@ -19,12 +19,11 @@ public class HealthDataTopology {
         builder.setBolt("annotate", new AnnotationBolt()).shuffleGrouping("interpolation");
 
         try {
-            // Add more bolts or define other connections as needed
             Config config = new Config();
-            config.setDebug(true);
+            //config.registerMetricsConsumer(org.apache.storm.metric.LoggingMetricsConsumer.class, 1);
             LocalCluster cluster = new LocalCluster();
 
-            cluster.submitTopology("SenmlSerializerTopology", config, builder.createTopology());
+            cluster.submitTopology("HealthDataTopology", config, builder.createTopology());
 
             Thread.sleep(15000);
             cluster.shutdown();

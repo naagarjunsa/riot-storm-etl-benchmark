@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SenmlSerializerBolt extends BaseRichBolt {
-    private HashMap<String, Double> senmlMap;
     OutputCollector collector;
 
     @Override
@@ -22,7 +21,6 @@ public class SenmlSerializerBolt extends BaseRichBolt {
 
 
     public static HashMap<String, Double> serializeSenml(String senml) {
-        String serialized = "";
 
         String senmlClean = senml.substring(2, senml.length() - 2);
 
@@ -52,8 +50,12 @@ public class SenmlSerializerBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
         String senml = input.getStringByField("healthDataString");
-        senmlMap = this.serializeSenml(senml);
-        this.collector.emit(new Values(senmlMap));
+        HashMap<String, Double> senmlMap = serializeSenml(senml);
+        this.collector.emit(input, new Values(senmlMap));
+        this.collector.ack(input);
+
+        System.out.println("LATENCY_RIOT_SENML : " + senmlMap.get("source_id") + " : " + System.nanoTime());
+
     }
 
     @Override

@@ -47,20 +47,10 @@ public class InterpolationBolt extends BaseStatefulBolt<KeyValueState<String, Do
     @Override
     public void execute(Tuple input) {
         HashMap<String, Double> inputMap = (HashMap<String, Double>) input.getValueByField("healthDataMapBloomFiltered");
-        
-        // add count and other fields as a key first time
-        if(this.globalStateMap.get("count", 0.0) == 0.0){
-            this.globalStateMap.put("count", 1.0);
-
-            for(String field: fields) {
-                this.globalStateMap.put(field, 0.0);
-            }
-        }
-
-        Double count = this.globalStateMap.get("count");
+        Double count = this.globalStateMap.get("count", 0.0);
 
         for(String field: fields) {
-            Double avg_val = this.globalStateMap.get(field);
+            Double avg_val = this.globalStateMap.get(field, 0.0);
 
             if(inputMap.containsKey(field)) {
                 //update the global state
@@ -75,7 +65,10 @@ public class InterpolationBolt extends BaseStatefulBolt<KeyValueState<String, Do
         }
         this.globalStateMap.put("count", count+1);
 
-        this.collector.emit(new Values(inputMap));
+        this.collector.emit(input, new Values(inputMap));
+        this.collector.ack(input);
+        System.out.println("LATENCY_RIOT_INTER : " + inputMap.get("source_id") + " : " + System.nanoTime());
+
     }
 
     @Override

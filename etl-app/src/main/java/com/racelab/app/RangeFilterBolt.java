@@ -49,8 +49,10 @@ public class RangeFilterBolt extends BaseRichBolt {
 
         boolean result = this.rangeFilter(inputMap);
         if(!result) {
-            this.collector.emit(new Values(inputMap));
+            this.collector.emit(input, new Values(inputMap));
         }
+        this.collector.ack(input);
+        System.out.println("LATENCY_RIOT_RANGE : " + inputMap.get("source_id") + " : " + System.nanoTime());
     }
 
     @Override

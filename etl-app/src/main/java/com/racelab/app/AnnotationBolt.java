@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 
 public class AnnotationBolt extends BaseRichBolt {
     OutputCollector collector;
+    
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
@@ -29,8 +30,9 @@ public class AnnotationBolt extends BaseRichBolt {
         res_string += "\ttimestamp: ";
         res_string += timestamp.toString();
 
-        this.collector.emit(new Values(res_string));
-        System.out.println(res_string);
+        this.collector.emit(input, new Values(res_string));
+        this.collector.ack(input);
+        System.out.println("LATENCY_RIOT_ANNOT : " + inputMap.get("source_id") + " : " + System.nanoTime());
     }
 
     @Override

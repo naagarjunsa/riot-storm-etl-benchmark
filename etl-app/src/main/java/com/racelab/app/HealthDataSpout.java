@@ -15,9 +15,12 @@ public class HealthDataSpout extends BaseRichSpout {
     private SpoutOutputCollector collector;
     private BufferedReader reader;
     private String fileName;
+    private boolean completed;
+    private double id;
 
     public HealthDataSpout(String fileName) {
         this.fileName = fileName;
+        id = 0;
     }
 
     @Override
@@ -25,6 +28,7 @@ public class HealthDataSpout extends BaseRichSpout {
         this.collector = collector;
         try {
             reader = new BufferedReader(new FileReader(this.fileName));
+            completed = false;
         } catch (Exception e) {
             throw new RuntimeException("Error opening file: " + e.getMessage());
         }
@@ -32,15 +36,20 @@ public class HealthDataSpout extends BaseRichSpout {
 
     @Override
     public void nextTuple() {
-        try {
-            String line = reader.readLine();
-            if (line != null) {
-                this.collector.emit(new Values(line));
-            } else {
-                Thread.sleep(1000);
+        if(!completed){
+            try {
+                id += 1;
+                String line = reader.readLine();
+                if (line != null) {
+                    this.collector.emit(new Values(line));
+                    System.out.println("LATENCY_RIOT_SOURCE : " + id + " : " + System.nanoTime());
+                } else {
+                    completed = true;
+                    reader.close();
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Error reading file: " + e.getMessage());
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Error reading file: " + e.getMessage());
         }
     }
 

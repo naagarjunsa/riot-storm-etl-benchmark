@@ -67,8 +67,10 @@ public class BloomFilterBolt extends BaseRichBolt {
         boolean result = bloomFilter(inputMap);
 
         if(!result){
-            this.collector.emit(new Values(inputMap));
+            this.collector.emit(input, new Values(inputMap));
         }
+        this.collector.ack(input);
+        System.out.println("LATENCY_RIOT_BLOOM : " + inputMap.get("source_id") + " : " + System.nanoTime());
     }
     
     @Override
