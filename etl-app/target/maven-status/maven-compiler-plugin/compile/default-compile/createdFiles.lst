@@ -1,5 +1,6 @@
 com/racelab/app/SenmlSerializerBolt.class
 com/racelab/app/AnnotationBolt.class
+com/racelab/app/StorageBolt.class
 com/racelab/app/BloomFilterBolt.class
 com/racelab/app/RangeFilterBolt.class
 com/racelab/app/HealthDataTopology.class

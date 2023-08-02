@@ -17,7 +17,7 @@ public class HealthDataTopology {
         builder.setBolt("bloomFilter", new BloomFilterBolt()).shuffleGrouping("rangeFilter");
         builder.setBolt("interpolation", new InterpolationBolt()).shuffleGrouping("bloomFilter");
         builder.setBolt("annotate", new AnnotationBolt()).shuffleGrouping("interpolation");
-
+        builder.setBolt("storage", new StorageBolt()).shuffleGrouping("annotate");
         try {
             Config config = new Config();
             //config.registerMetricsConsumer(org.apache.storm.metric.LoggingMetricsConsumer.class, 1);

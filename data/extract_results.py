@@ -4,8 +4,7 @@ def create_hashmap_from_records(records):
     hashmap = {}
 
     for record in records:
-        parts = record.split("_")
-        parts = parts[2].split(" : ")
+        parts = record.split(" : ")
         if len(parts) == 3:
             source_type, version, data = parts
             hashmap_key = f"{source_type} : {int(float(version))}"
@@ -22,10 +21,6 @@ filename = "raw_results.txt"
 records = read_records_from_file(filename)
 
 hashmap = create_hashmap_from_records(records)
-
-# Print the hashmap
-for key, value in hashmap.items():
-    print(f"{key} => {value}")
 
 
 # get the latency for the first node
@@ -65,12 +60,22 @@ for i in range(1, 11):
     annot_latency.append(int(hashmap[key_dest]) - int(hashmap[key_source]))
 results.append(annot_latency)
 
+storage_latency = []
+for i in range(1, 11):
+    key_source = f"ANNOT : {str(i)}"
+    key_dest = f"STORAGE : {str(i)}"
+    storage_latency.append(int(hashmap[key_dest]) - int(hashmap[key_source]))
+results.append(storage_latency)
+
 with open("results.csv", mode="w", newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(["SENML", "RANGE", "BLOOM", "INTERPOLATE", "ANNOT"])
-    
+    writer.writerow(["SENML", "RANGE", "BLOOM", "INTERPOLATE", "ANNOT", "PERSIST", "TOTAL_SUM"])
+    avg = []
     for i in range(10):
         row_arr = []
         for arr in results:
             row_arr.append(arr[i]/1000000)
+        row_arr.append(sum(row_arr))
         writer.writerow(row_arr)
+
+print(avg)
