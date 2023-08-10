@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.Arrays;
 
-public class InterpolationBolt extends BaseStatefulBolt<KeyValueState<String, Double>> {
+public class AverageBolt extends BaseStatefulBolt<KeyValueState<String, Double>> {
     List<String> fields;
     private KeyValueState<String, Double> globalStateMap;
     private OutputCollector collector;
@@ -45,34 +45,29 @@ public class InterpolationBolt extends BaseStatefulBolt<KeyValueState<String, Do
 
     @Override
     public void execute(Tuple input) {
-        HashMap<String, Double> inputMap = (HashMap<String, Double>) input.getValueByField("healthDataMapBloomFiltered");
+        HashMap<String, Double> inputMap = (HashMap<String, Double>) input.getValueByField("statDataMap");
         Double count = this.globalStateMap.get("count", 0.0);
-
         for(String field: fields) {
             Double avg_val = this.globalStateMap.get(field, 0.0);
 
-            if(inputMap.containsKey(field)) {
-                //update the global state
-                avg_val = (avg_val * (count-1) + inputMap.get(field)) * count;
-            }
-            else {
-                // add the average value to the state and update global state
-                inputMap.put(field, avg_val);
-                avg_val = (avg_val * (count-1) + avg_val) * count;
-            }
+            //update the global state
+            avg_val = (avg_val * (count-1) + inputMap.get(field)) * count;
+            
             this.globalStateMap.put(field, avg_val);
+            inputMap.put(field+"avg", avg_val);
         }
+
         this.globalStateMap.put("count", count+1);
 
         this.collector.emit(input, new Values(inputMap));
         this.collector.ack(input);
-        System.out.println("LATENCY_RIOT_INTER : " + inputMap.get("source_id") + " : " + System.nanoTime());
+        System.out.println("LATENCY_RIOT_AVERAGED : " + inputMap.get("source_id") + " : " + System.nanoTime());
 
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("healthDataMapInterpolated"));
+        declarer.declare(new Fields("statDataMapAveraged"));
     }
 
 }

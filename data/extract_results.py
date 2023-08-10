@@ -70,7 +70,7 @@ results.append(storage_latency)
 with open("results.csv", mode="w", newline='') as file:
     writer = csv.writer(file)
     writer.writerow(["SENML", "RANGE", "BLOOM", "INTERPOLATE", "ANNOT", "PERSIST", "TOTAL_SUM"])
-    avg = []
+
     for i in range(10):
         row_arr = []
         for arr in results:
